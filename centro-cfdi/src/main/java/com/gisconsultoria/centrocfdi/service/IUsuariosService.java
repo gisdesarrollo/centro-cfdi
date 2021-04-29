@@ -10,7 +10,11 @@ public interface IUsuariosService {
 
 	public Usuarios getUserById(Long id);
 	
-	public List<Usuarios> getUsuarios();
+	public List<Usuarios> getAllUsuarios();
 	
 	public Usuarios findByUsername(String username);
+	
+	public void delete(Long id);
+	
+	
 }

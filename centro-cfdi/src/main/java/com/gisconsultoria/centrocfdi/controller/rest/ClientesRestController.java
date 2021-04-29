@@ -209,16 +209,22 @@ public class ClientesRestController {
 
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/cliente/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
+	public ResponseEntity<?> deleteClienteById(@PathVariable Long id) {
 		Map<String, Object> response = new HashMap<>();
 		try {
 			Clientes cliente = clienteService.findById(id);
+			File directory=null;
 			if (cliente.getId() == null) {
 				response.put("mensaje",
 						"Error al eliminar el cliente con ID :".concat(id.toString().concat("no existe en la BD!")));
 				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 			}
+			directory = new File(pathArchivos, File.separator + cliente.getNombre());
 			clienteService.delete(id);
+			boolean valid = destroyDirectory(directory);
+			if(valid) {
+				logger.info("directorio eliminado con exíto: " +cliente.getNombre());
+			}
 		} catch (DataAccessException e) {
 			response.put("mensaje", "Error al eliminar el cliente de la base de datos");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMessage()));
@@ -230,7 +236,7 @@ public class ClientesRestController {
 
 	@Secured("ROLE_ADMIN" )
 	@GetMapping("/cliente/{id}")
-	public ResponseEntity<?> getUsuarios(@PathVariable Long id) {
+	public ResponseEntity<?> getClientesById(@PathVariable Long id) {
 
 		Clientes cliente = null;
 		Map<String, Object> response = new HashMap<>();
@@ -263,5 +269,23 @@ public class ClientesRestController {
 		 	file.mkdir();
 	        return true;
 	    }
+	 
+	 private boolean destroyDirectory(File file) {
+		 if(file.exists() && file.isDirectory()) {
+			 try {
+				 for(File listfile : file.listFiles()) {
+					 if(listfile.isFile()) {
+						 listfile.delete();
+					 }
+				 }
+			 }catch (NullPointerException e) {
+				e.printStackTrace();
+				logger.error("Error al momento de eliminar el directorio:" +file.getName());
+			}
+			 return file.delete();
+		 }
+		 
+		 return false;
+	 }
 
 }

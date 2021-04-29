@@ -16,6 +16,9 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name="cat_usuarios")
@@ -31,14 +34,18 @@ public class Usuarios  implements Serializable{
 	@Column(name = "id_usuario")
 	private Long id;
 	
+	
 	@Column(unique = true, length = 30)
 	private String username; 
+	
 	
 	@Column(length = 40)
 	private String nombre;
 	
+	
 	@Column(length = 40)
 	private String apellidos;
+	
 	
 	@Column(length = 60)
 	private String password;
@@ -49,21 +56,24 @@ public class Usuarios  implements Serializable{
 	private Boolean estatus;
 	
 	@Transient
+	private String nuevaPassword;
+	
+	@Transient
 	private Long[] clienteId;
 	
 	@Transient
 	private String[] comprobante;
 	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "rel_usuarios_roles", joinColumns = @JoinColumn(name = "id_usuario"), inverseJoinColumns = @JoinColumn(name = "id_role")
 	,uniqueConstraints = {@UniqueConstraint(columnNames = {"id_usuario", "id_role"})})
 	private List<Roles> roles;
 	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "rel_usuarios_clientes", joinColumns = @JoinColumn(name = "id_usuario"), inverseJoinColumns = @JoinColumn(name = "id_cliente"))
 	private List<Clientes> clientes;
 	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "rel_usuarios_comprobantes", joinColumns = @JoinColumn(name = "id_usuario"), inverseJoinColumns = @JoinColumn(name = "id_comprobante"))
 	private List<Comprobantes> comprobantes;
 	
@@ -162,6 +172,14 @@ public class Usuarios  implements Serializable{
 
 	public void setComprobantes(List<Comprobantes> comprobantes) {
 		this.comprobantes = comprobantes;
+	}
+
+	public String getNuevaPassword() {
+		return nuevaPassword;
+	}
+
+	public void setNuevaPassword(String nuevaPassword) {
+		this.nuevaPassword = nuevaPassword;
 	}
 	
 }

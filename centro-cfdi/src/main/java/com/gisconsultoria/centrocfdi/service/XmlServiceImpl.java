@@ -35,9 +35,14 @@ public class XmlServiceImpl implements IXmlService {
 	}
 
 	@Override
-	public List<Xml> getAllFilePdfByParameter(String fechaInicial, String fechaFinal, String tipoComprobante,
-			String clienteId) {
+	public List<Xml> getAllFilePdfByParameter(String fechaInicial, String fechaFinal, List<String> tipoComprobante,
+			List<Long> clienteId) {
 		return xmlDao.getAllFileXmlByParameter(fechaInicial, fechaFinal, tipoComprobante, clienteId);
+	}
+
+	@Override
+	public List<Xml> getAllfileXmlByComprobanteAndCliente(List<String> tipoComprobante, List<Long> clienteId) {
+		return xmlDao.getAllfileXmlByComprobanteAndCliente(tipoComprobante, clienteId);
 	}
 
 	

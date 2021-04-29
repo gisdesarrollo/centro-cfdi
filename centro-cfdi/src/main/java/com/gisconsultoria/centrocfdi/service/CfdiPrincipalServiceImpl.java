@@ -33,9 +33,8 @@ public class CfdiPrincipalServiceImpl implements ICfdiPrincipalService {
 
 
 	@Override
-	public List<CfdiPrincipal> findCfdiByFecha(String fechaInicial, String fechafinal, String tipoComprobante,
-			String clienteId) {
-		return cfdiPrincipalDao.findCfdiByFecha(fechaInicial, fechafinal, tipoComprobante, clienteId);
+	public List<CfdiPrincipal> findCfdiByFecha(String fechaInicial, String fechafinal) {
+		return cfdiPrincipalDao.findCfdiByFecha(fechaInicial, fechafinal);
 	}
 
 	@Override
@@ -80,6 +79,23 @@ public class CfdiPrincipalServiceImpl implements ICfdiPrincipalService {
 	@Override
 	public int countSearchByClienteAndComprobante(List<Long> cliente, List<String> comprobante) {
 		return cfdiPrincipalDao.countSearchByClienteAndComprobante(cliente, comprobante);
+	}
+
+	@Override
+	public List<CfdiPrincipal> findCfdiByFechaAndComprobante(String fechaInicial, String fechafinal,
+			String tipoComprobante) {
+		return cfdiPrincipalDao.findCfdiByFechaAndComprobante(fechaInicial, fechafinal, tipoComprobante);
+	}
+
+	@Override
+	public List<CfdiPrincipal> findCfdiByFechaByComprobanteAndCliente(String fechaInicial, String fechafinal,
+			String tipoComprobante, String clienteId) {
+		return cfdiPrincipalDao.findCfdiByFechaByComprobanteAndCliente(fechaInicial, fechafinal, tipoComprobante, clienteId);
+	}
+
+	@Override
+	public List<CfdiPrincipal> findCfdiByFechaAndCliente(String fechaInicial, String fechafinal, String clienteId) {
+		return cfdiPrincipalDao.findCfdiByFechaAndCliente(fechaInicial, fechafinal, clienteId);
 	}
 
 

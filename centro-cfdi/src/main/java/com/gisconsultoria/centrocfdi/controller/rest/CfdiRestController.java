@@ -108,7 +108,7 @@ public class CfdiRestController {
 			if (rolUsername != null && rolUsername.equals("ROLE_ADMIN")) {
 				//ROLE_ADMIN
 				DataTablesOutput<CfdiPrincipal> dtoCfdi = cfdiPrincipalDao.findAll(input);
-				if (!fechaInicial.contains("undefined") || !fechafinal.contains("undefined")) {
+				if (!fechaInicial.contains("undefined") && !fechafinal.contains("undefined")) {
 					if (tipoComprobante.contains("undefined")) {
 						tipoComprobante = "";
 					}
@@ -121,14 +121,25 @@ public class CfdiRestController {
 						searchTotal = cfdiPrincipalDao.countSearch(fechaInicial, fechafinal, tipoComprobante,
 								clienteId);
 					} else {
-						logger.info(clienteId);
-						cfdi = cfdiPrincipalService.findCfdiByFecha(fechaInicial, fechafinal, tipoComprobante,
-								clienteId);
+						if(tipoComprobante!="" && clienteId!="") {
+							cfdi = cfdiPrincipalService.findCfdiByFechaByComprobanteAndCliente(fechaInicial, fechafinal, tipoComprobante, clienteId);
+							searchTotal = cfdi.size();
+						}else
+						if(tipoComprobante!="" && clienteId=="") {
+							cfdi =cfdiPrincipalService.findCfdiByFechaAndComprobante(fechaInicial, fechafinal, tipoComprobante);
+							searchTotal = cfdi.size();
+						}else
+						if(tipoComprobante=="" && clienteId!="") {
+							cfdi = cfdiPrincipalService.findCfdiByFechaAndCliente(fechaInicial, fechafinal, clienteId);
+							searchTotal = cfdi.size();
+						}else {
+						cfdi = cfdiPrincipalService.findCfdiByFecha(fechaInicial, fechafinal);
 						searchTotal = cfdi.size();
+						}
 					}
 					if (cfdi != null && cfdi.size() > 0) {
 						listDto = cfdi.stream().map(this::convertToDto).collect(Collectors.toList());
-						// error empieza desde aka
+					
 						int startCfdi = input.getStart();
 						totalCfdi = input.getLength() + input.getStart();
 						int validamostotalstart = totalCfdi;
@@ -189,7 +200,7 @@ public class CfdiRestController {
 				// ROLE_USER
 				idCliente = clienteService.getIdClienteByUsername(username);
 				comprobante = comprobanteService.getNameComprobanteByUsername(username);
-				 
+				
 					// busqueda de cfdi con input
 					if (!fechaInicial.contains("undefined") || !fechafinal.contains("undefined")) {
 						SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
@@ -202,6 +213,7 @@ public class CfdiRestController {
 							for(int x=0;x<comprobante.size();x++) {
 								if(!comprobante.get(x).equals(tipoComprobante)) {
 									comprobante.remove(x);
+									x--;
 								}
 							}
 						}
@@ -211,6 +223,7 @@ public class CfdiRestController {
 							for(int x=0;x<idCliente.size();x++) {
 								if(!idCliente.get(x).toString().equals(clienteId)) {
 									idCliente.remove(x);
+									x--;
 								}
 							}
 						}

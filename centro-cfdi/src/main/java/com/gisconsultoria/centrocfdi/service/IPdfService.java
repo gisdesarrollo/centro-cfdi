@@ -18,5 +18,7 @@ public interface IPdfService {
 	public List<Pdf> getAllFilePdf();
 	
 	public List<Pdf> getAllFilePdfByParameter(String fechaInicial,String fechaFinal ,
-			String tipoComprobante,String clienteId);
+			List<String> tipoComprobante,List<Long> clienteId);
+	
+	public List<Pdf> getAllFilePdfByComprobanteAndcliente(List<String> tipoComprobante,List<Long> clienteId);
 }

@@ -24,14 +24,21 @@ public class UsuariosServiceImpl implements IUsuariosService{
 		return usuarioDao.findById(id).orElse(null);
 	}
 
-	@Override
-	public List<Usuarios> getUsuarios() {
-		return usuarioDao.getUsuarios();
-	}
 
 	@Override
 	public Usuarios findByUsername(String username) {
 		return usuarioDao.findByUsername(username);
+	}
+
+	@Override
+	public List<Usuarios> getAllUsuarios() {
+		return (List<Usuarios>) usuarioDao.findAll();
+	}
+
+	@Override
+	public void delete(Long id) {
+		usuarioDao.deleteById(id);
+		
 	}
 
 }

@@ -15,7 +15,19 @@ public interface ICfdiPrincipalService {
 	
 	public List<CfdiPrincipal> findAll();
 	
-	public List<CfdiPrincipal> findCfdiByFecha(String fechaInicial,String fechafinal,String tipoComprobante,
+	public List<CfdiPrincipal> findCfdiByFecha(String fechaInicial,String fechafinal);
+	
+	public List<CfdiPrincipal> findCfdiByFechaAndComprobante(String fechaInicial,
+			   String fechafinal,
+			   String tipoComprobante);
+	
+	public List<CfdiPrincipal> findCfdiByFechaAndCliente(String fechaInicial,
+			   String fechafinal,
+			   String clienteId);
+	
+	public List<CfdiPrincipal> findCfdiByFechaByComprobanteAndCliente(String fechaInicial,
+			   String fechafinal,
+			   String tipoComprobante,
 			   String clienteId );
 	
 	public List<CfdiPrincipal> findCfdiBySearch(String searchParams,String fechaIncial,String fechafinal,String clienteId

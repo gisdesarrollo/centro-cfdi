@@ -17,5 +17,7 @@ public interface IXmlService {
 	public List<Xml> getAllFileXml();
 	
 	public List<Xml> getAllFilePdfByParameter(String fechaInicial,String fechaFinal ,
-			String tipoComprobante,String clienteId);
+			List<String> tipoComprobante,List<Long> clienteId);
+	
+	public List<Xml> getAllfileXmlByComprobanteAndCliente(List<String> tipoComprobante,List<Long> clienteId);
 }

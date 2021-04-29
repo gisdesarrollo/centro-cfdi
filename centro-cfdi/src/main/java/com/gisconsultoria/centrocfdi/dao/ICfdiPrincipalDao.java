@@ -14,9 +14,21 @@ public interface ICfdiPrincipalDao extends DataTablesRepository<CfdiPrincipal, L
 	@Query("select c from CfdiPrincipal c where c.tfdUuid = :uuid")
     public List<CfdiPrincipal> findFirstCfdiByUuid(@Param("uuid") String uuid);
 	
-	@Query(value="select c.* from m_cfdi_33 c where c.fecha between ?1 and ?2 and c.tipodecomprobante like %?3%"
-			+ " and c.id_cliente like %?4%",nativeQuery = true)
+	@Query(value="select c.* from m_cfdi_33 c where c.fecha between ?1 and ?2",nativeQuery = true)
 	public List<CfdiPrincipal> findCfdiByFecha(String fechaInicial,
+											   String fechafinal);
+	@Query(value="select c.* from m_cfdi_33 c where c.fecha between ?1 and ?2 and c.tipodecomprobante in(?3)",nativeQuery = true)
+	public List<CfdiPrincipal> findCfdiByFechaAndComprobante(String fechaInicial,
+											   String fechafinal,
+											   String tipoComprobante);
+	@Query(value="select c.* from m_cfdi_33 c where c.fecha between ?1 and ?2 and c.id_cliente in(?3)",nativeQuery = true)
+	public List<CfdiPrincipal> findCfdiByFechaAndCliente(String fechaInicial,
+											   String fechafinal,
+											   String clienteId);
+
+	@Query(value="select c.* from m_cfdi_33 c where c.fecha between ?1 and ?2 and c.tipodecomprobante like %?3% "
+			+ "and c.id_cliente in(?4)",nativeQuery = true)
+	public List<CfdiPrincipal> findCfdiByFechaByComprobanteAndCliente(String fechaInicial,
 											   String fechafinal,
 											   String tipoComprobante,
 											   String clienteId );

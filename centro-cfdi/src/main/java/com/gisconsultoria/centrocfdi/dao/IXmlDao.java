@@ -21,8 +21,16 @@ public interface IXmlDao extends CrudRepository<Xml, Long> {
 	
 	@Query(value="select x.* from m_cfdi_33 c "
 			+ "join cat_xml x on (c.id_cfdi=x.id_cfdi) "
-			+ "where c.fecha between ?1 and ?2 and c.tipodecomprobante like %?3% "
-			+ "and c.id_cliente like %?4%",nativeQuery = true)
+			+ "where c.fecha between ?1 and ?2 and c.tipodecomprobante in(?3) "
+			+ "and c.id_cliente in(?4)",nativeQuery = true)
 	public List<Xml> getAllFileXmlByParameter(String fechaInicial,String fechaFinal ,
-												String tipoComprobante,String clienteId);
+												List<String> tipoComprobante,List<Long> clienteId);
+	
+	
+	@Query(value="select x.* from m_cfdi_33 c "
+			+ "join cat_xml x on (c.id_cfdi=x.id_cfdi) "
+			+ "where c.tipodecomprobante in(?1) "
+			+ "and c.id_cliente in(?2)",nativeQuery = true)
+	public List<Xml> getAllfileXmlByComprobanteAndCliente(List<String> tipoComprobante,List<Long> clienteId);
+	
 }

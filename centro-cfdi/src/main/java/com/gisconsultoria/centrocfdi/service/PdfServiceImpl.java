@@ -36,9 +36,14 @@ public class PdfServiceImpl implements IPdfService {
 	}
 
 	@Override
-	public List<Pdf> getAllFilePdfByParameter(String fechaInicial, String fechaFinal, String tipoComprobante,
-			String clienteId) {
+	public List<Pdf> getAllFilePdfByParameter(String fechaInicial, String fechaFinal, List<String> tipoComprobante,
+			List<Long> clienteId) {
 		return pdfDao.getAllFilePdfByParameter(fechaInicial, fechaFinal, tipoComprobante, clienteId);
+	}
+
+	@Override
+	public List<Pdf> getAllFilePdfByComprobanteAndcliente(List<String> tipoComprobante, List<Long> clienteId) {
+		return pdfDao.getAllFilePdfByComprobanteAndcliente(tipoComprobante, clienteId);
 	}
 
 }
