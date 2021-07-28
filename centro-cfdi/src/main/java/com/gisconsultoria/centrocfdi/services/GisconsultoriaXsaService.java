@@ -69,6 +69,8 @@ public class GisconsultoriaXsaService {
 			e.printStackTrace();
 			LOG.error("Error al momento de transformar la url : "+e);
 		}
+        }else {
+        	LOG.info("No se encuentra un servidor y key asignado al cliente:" +sucursal.getNombre());
         }
     }
 

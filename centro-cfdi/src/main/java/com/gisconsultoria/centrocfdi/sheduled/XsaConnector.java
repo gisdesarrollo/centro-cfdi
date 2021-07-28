@@ -24,8 +24,8 @@ import com.gisconsultoria.centrocfdi.services.GisconsultoriaXsaService;
 import com.gisconsultoria.centrocfdi.util.GisConsultoriaReadXmlFile;
 
 
-@Configuration
-@EnableScheduling
+//@Configuration
+//@EnableScheduling
 public class XsaConnector {
 
 	private static final Logger LOG = LoggerFactory.getLogger(XsaConnector.class);
@@ -45,7 +45,7 @@ public class XsaConnector {
 	@Value("${path.archivo.archivosXml}")
     private File path;
  
-	 @Scheduled(cron = "05 03 00 * * *", zone = "America/Mexico_City")
+	// @Scheduled(cron = "0 0 0 * * *", zone = "America/Mexico_City")
 	 public void ProcesandoFoliofiscal() {
 		 
 		// cfdiRecibidos.getcfdiRecibidos();
@@ -57,7 +57,7 @@ public class XsaConnector {
 	        if(empresas != null){
 	            try{
 	                LOG.info("DESCARGANDO ARCHIVOS DEL SERVLET");
-	              /*for(Clientes sucursal : empresas){
+	             /* for(Clientes sucursal : empresas){
 	                        if(fechaActual.after(sucursal.getFechaInicial())){
 	                            LocalDate fechaInicial = sucursal.getFechaInicial().toInstant()
 	                                                             .atZone(zoneId)

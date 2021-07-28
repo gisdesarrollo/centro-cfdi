@@ -24,4 +24,5 @@ public interface IComprobanteDao extends CrudRepository<Comprobantes, Long>{
 	@Query("select c from Comprobantes c where c.nombre IN :comprobante")
 	 public List<Comprobantes> getComprobanteWithIn(@Param("comprobante")List<String> comprobante);
 
+	
 }

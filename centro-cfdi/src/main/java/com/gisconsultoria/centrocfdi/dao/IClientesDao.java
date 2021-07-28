@@ -38,5 +38,8 @@ public interface IClientesDao extends CrudRepository<Clientes, Long> {
 	
 	 @Query("select c from Clientes c where c.id IN :cliente")
 	 public List<Clientes> getClienteWithIn(@Param("cliente")List<Long> cliente);
+	 
+	 @Query("select c from Clientes c where c.id=?1")
+	 public Clientes getClienteById(Long id);
 	
 }

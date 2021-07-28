@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -70,6 +71,9 @@ public class CfdiPrincipal implements Serializable {
 	private String tfdNoCertificado;
 	@Column(name = "tfd_sellosat")
 	private String tfdSellSat;
+	
+	@Transient
+	private int totalRecords;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cliente"/*,nullable = false*/)
@@ -347,6 +351,15 @@ public class CfdiPrincipal implements Serializable {
 
 	public void setTfdSellSat(String tfdSellSat) {
 		this.tfdSellSat = tfdSellSat;
+	}
+	
+
+	public int getTotalRecords() {
+		return totalRecords;
+	}
+
+	public void setTotalRecords(int totalRecords) {
+		this.totalRecords = totalRecords;
 	}
 
 	@Override

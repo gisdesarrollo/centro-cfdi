@@ -146,8 +146,10 @@ public class DownloadFilesRestController {
 		Date fecha = new Date();
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		String rolUsername = null;
-		List<Long> idCliente = null;
-		List<String> comprobante = null;
+		List<Long> idCliente = new ArrayList<>();
+		List<String> comprobante = new ArrayList<>();
+		List<String> listComprobante = new  ArrayList<>();
+		List<Long> ListIdCliente= null;
 		try {
 			if (username != null) {
 				Usuarios usuario = usuarioService.findByUsername(username);
@@ -159,33 +161,28 @@ public class DownloadFilesRestController {
 				pdf = pdfService.getAllFilePdf();
 				xml = xmlService.getAllFileXml();
 			} else {
-				idCliente = clienteService.getIdClienteByUsername(username);
-				comprobante = comprobanteService.getNameComprobanteByUsername(username);
+				ListIdCliente = clienteService.getIdClienteByUsername(username);
+				listComprobante = comprobanteService.getNameComprobanteByUsername(username);
 
 				if (!fechaInicial.contains("undefined") || !fechaFinal.contains("undefined")) {
 					if (tipoComprobante.contains("undefined")) {
 						tipoComprobante = "";
+						comprobante=listComprobante;
 					} else {
-						for (int x = 0; x < comprobante.size(); x++) {
-							if (!comprobante.get(x).equals(tipoComprobante)) {
-								comprobante.remove(x);
-							}
-						}
+						comprobante.add(tipoComprobante);
 					}
 					if (clienteId.contains("undefined")) {
 						clienteId = "";
+						idCliente=ListIdCliente;
 					} else {
-						for (int x = 0; x < idCliente.size(); x++) {
-							if (!idCliente.get(x).toString().equals(clienteId)) {
-								idCliente.remove(x);
-							}
-						}
+						idCliente.add(Long.parseLong(clienteId));
+							
 					}
 					pdf = pdfService.getAllFilePdfByParameter(fechaInicial, fechaFinal, comprobante, idCliente);
 					xml = xmlService.getAllFilePdfByParameter(fechaInicial, fechaFinal, comprobante, idCliente);
 				} else {
-					pdf = pdfService.getAllFilePdfByComprobanteAndcliente(comprobante, idCliente);
-					xml = xmlService.getAllfileXmlByComprobanteAndCliente(comprobante, idCliente);
+					pdf = pdfService.getAllFilePdfByComprobanteAndcliente(listComprobante, ListIdCliente);
+					xml = xmlService.getAllfileXmlByComprobanteAndCliente(listComprobante, ListIdCliente);
 					pdf.size();
 					xml.size();
 				}

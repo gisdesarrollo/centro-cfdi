@@ -24,6 +24,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.datatables.mapping.Column;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -76,29 +79,28 @@ public class CfdiRestController {
 	@Autowired
 	private ModelMapper mapper;
 
-	@Secured({ "ROLE_ADMIN", "ROLE_USER" })
+	@SuppressWarnings("unused")
+	//@Secured({ "ROLE_ADMIN", "ROLE_USER" })
 	@RequestMapping(value = "/data/cfdi", method = RequestMethod.POST)
 	@ResponseBody
-	public void getCfdiByParametros(@RequestParam(value = "inicial", required = false) String fechaInicial,
+	public DataTablesOutput<DataTableResponseDto> getCfdiByParametros(@RequestParam(value = "inicial", required = false) String fechaInicial,
 			@RequestParam(value = "final", required = false) String fechafinal,
 			@RequestParam(value = "clienteId", required = false) String clienteId,
 			@RequestParam(value = "tipoComp", required = false) String tipoComprobante,
 			@RequestParam(value = "username", required = false) String username,
-			@RequestBody DataTablesInput input,
-			HttpServletResponse response) throws IOException {
+			@RequestBody DataTablesInput input) throws IOException {
 
-		List<CfdiPrincipal> cfdi = null;
-		List<DataTableResponseDto> listDto = null;
-		int totalCfdi = 0;
-		int index = 1;
-		String data = "";
-		String json = null;
+		
+		Page<CfdiPrincipal> cfdi = null;
 		int searchTotal = 0;
 		String rolUsername = null;
 		List<Long> idCliente = null;
 		List<String> comprobante = null;
-
+		int cfdiSize=0;
+		DataTablesOutput<DataTableResponseDto> result = new DataTablesOutput<>();
 		try {
+			int pageNumber = (int) (Math.floor(input.getStart() / input.getLength()) + ( input.getStart() % input.getLength()));
+			Pageable pageableRequest= PageRequest.of(pageNumber,input.getLength());
 			if (username != null) {
 				Usuarios usuario = usuarioService.findByUsername(username);
 				for (Roles rol : usuario.getRoles()) {
@@ -107,7 +109,6 @@ public class CfdiRestController {
 			}
 			if (rolUsername != null && rolUsername.equals("ROLE_ADMIN")) {
 				//ROLE_ADMIN
-				DataTablesOutput<CfdiPrincipal> dtoCfdi = cfdiPrincipalDao.findAll(input);
 				if (!fechaInicial.contains("undefined") && !fechafinal.contains("undefined")) {
 					if (tipoComprobante.contains("undefined")) {
 						tipoComprobante = "";
@@ -116,88 +117,49 @@ public class CfdiRestController {
 						clienteId = "";
 					}
 					if (input.getSearch().getValue() != null && input.getSearch().getValue() != "") {
-						cfdi = cfdiPrincipalDao.findCfdiBySearch(input.getSearch().getValue(), fechaInicial, fechafinal,
-								clienteId, tipoComprobante);
-						searchTotal = cfdiPrincipalDao.countSearch(fechaInicial, fechafinal, tipoComprobante,
-								clienteId);
-					} else {
-						if(tipoComprobante!="" && clienteId!="") {
-							cfdi = cfdiPrincipalService.findCfdiByFechaByComprobanteAndCliente(fechaInicial, fechafinal, tipoComprobante, clienteId);
-							searchTotal = cfdi.size();
-						}else
-						if(tipoComprobante!="" && clienteId=="") {
-							cfdi =cfdiPrincipalService.findCfdiByFechaAndComprobante(fechaInicial, fechafinal, tipoComprobante);
-							searchTotal = cfdi.size();
-						}else
-						if(tipoComprobante=="" && clienteId!="") {
-							cfdi = cfdiPrincipalService.findCfdiByFechaAndCliente(fechaInicial, fechafinal, clienteId);
-							searchTotal = cfdi.size();
+						cfdi = cfdiPrincipalService.findCfdiBySearch(input.getSearch().getValue(), fechaInicial, fechafinal,
+								clienteId, tipoComprobante,pageableRequest);
+						searchTotal = (int) cfdi.getTotalElements();
+						if(!clienteId.equals("")) {
+							cfdiSize = cfdiPrincipalService.countCfdiByFechaAndClienteAndComprobante(fechaInicial, fechafinal, clienteId,tipoComprobante);
 						}else {
-						cfdi = cfdiPrincipalService.findCfdiByFecha(fechaInicial, fechafinal);
-						searchTotal = cfdi.size();
+							cfdiSize = cfdiPrincipalService.countByFechaByComprobante(fechaInicial, fechafinal, tipoComprobante);
 						}
+						
+					} else {
+						if(!clienteId.equals("")) {
+							cfdi = cfdiPrincipalService.findCfdiByFechaAndClienteAndComprobante(fechaInicial, fechafinal, clienteId,tipoComprobante,pageableRequest);
+							cfdiSize = (int) cfdi.getTotalElements();
+						}else {
+							cfdi = cfdiPrincipalService.findCfdiByFechaAndComprobante(fechaInicial, fechafinal, tipoComprobante,pageableRequest);
+							cfdiSize = (int) cfdi.getTotalElements();
+						}
+						
 					}
-					if (cfdi != null && cfdi.size() > 0) {
-						listDto = cfdi.stream().map(this::convertToDto).collect(Collectors.toList());
+					if (cfdi.getContent() != null && cfdi.getContent().size() > 0) {					
+						 result.setData(cfdi.getContent().stream().map(this::convertToDto).collect(Collectors.toList()));
+				         result.setRecordsTotal(cfdiSize);
+				         if(searchTotal>0) {
+								result.setRecordsFiltered(searchTotal);
+							}else {
+								result.setRecordsFiltered(cfdiSize);
+							}
+					}
 					
-						int startCfdi = input.getStart();
-						totalCfdi = input.getLength() + input.getStart();
-						int validamostotalstart = totalCfdi;
-						if (validamostotalstart > listDto.size()) {
-							totalCfdi = listDto.size();
-						}
-
-						index += startCfdi;
-						for (int x = input.getStart(); x < totalCfdi; x++) {
-
-							data += "{" + "\"razonSocial\" :" + "\"" + listDto.get(x).getRazonSocial() + "\", "
-									+ "\"rfc\" :" + "\"" + listDto.get(x).getRfc() + "\", " + "\"uuid\" :" + "\""
-									+ listDto.get(x).getUuid() + "\", " + "\"folio\" :" + "\""
-									+ listDto.get(x).getFolio() + "\", " + "\"serie\" :" + "\""
-									+ listDto.get(x).getSerie() + "\", " + "\"fecha\" :" + "\""
-									+ listDto.get(x).getFecha() + "\", " + "\"total\" : " + "\""
-									+ listDto.get(x).getTotal() + "\", " + "\"id\" :" + "\"" + listDto.get(x).getId()
-									+ "\"" + "}";
-
-							if (index < totalCfdi) {
-								data += ",";
-							}
-
-							index++;
-						}
-
-					}
-					json = "{" + "\"recordsTotal\" : " + searchTotal + "," + "\"recordsFiltered\" : " + cfdi.size()
-							+ "," + "\"data\" : [" + data + "]" + "}";
 				} else {
-
+					DataTablesOutput<CfdiPrincipal> dtoCfdi = cfdiPrincipalDao.findAll(input);
+					
 					if (dtoCfdi.getData() != null && dtoCfdi.getData().size()>0) {
-						listDto = dtoCfdi.getData().stream().map(this::convertToDto).collect(Collectors.toList());
-						totalCfdi = listDto.size();
-						logger.info(totalCfdi);
-						for (DataTableResponseDto datas : listDto) {
-
-							data += "{" + "\"razonSocial\" :" + "\"" + datas.getRazonSocial() + "\", " + "\"rfc\" :"
-									+ "\"" + datas.getRfc() + "\", " + "\"uuid\" :" + "\"" + datas.getUuid() + "\", "
-									+ "\"folio\" :" + "\"" + datas.getFolio() + "\", " + "\"serie\" :" + "\""
-									+ datas.getSerie() + "\", " + "\"fecha\" :" + "\"" + datas.getFecha() + "\", "
-									+ "\"total\" : " + "\"" + datas.getTotal() + "\", " + "\"id\" :" + "\""
-									+ datas.getId() + "\"" + "}";
-
-							if (index < totalCfdi) {
-								data += ",";
-							}
-
-							// logger.info(data);
-							index++;
-						}
+						 result.setData(dtoCfdi.getData().stream().map(this::convertToDto).collect(Collectors.toList()));
+				         result.setRecordsFiltered(dtoCfdi.getRecordsFiltered());
+				         result.setRecordsTotal(dtoCfdi.getRecordsTotal());
 
 					}
-					json = "{" + "\"recordsTotal\" : " + dtoCfdi.getRecordsFiltered() + "," + "\"recordsFiltered\" : "
-							+ dtoCfdi.getRecordsTotal() + "," + "\"data\" : [" + data + "]" + "}";
+					
 				}
 			} else {
-				// ROLE_USER
+				// ROLE_USER		
+		
 				idCliente = clienteService.getIdClienteByUsername(username);
 				comprobante = comprobanteService.getNameComprobanteByUsername(username);
 				
@@ -227,65 +189,50 @@ public class CfdiRestController {
 								}
 							}
 						}
-						//busqueda cfdi por search
+						//busqueda cfdi por search and input
 						if (input.getSearch().getValue() != null && input.getSearch().getValue() != "") {
-							cfdi = cfdiPrincipalService.findCfdiBySearchWitnIn(input.getSearch().getValue(), fechaInicial, fechafinal, idCliente, comprobante);
-							searchTotal = cfdiPrincipalService.countSearchWithIn(fechaInicial, fechafinal, idCliente, comprobante);
+							cfdi = cfdiPrincipalService.findCfdiBySearchWitnIn(input.getSearch().getValue(), fechaInicial, fechafinal, idCliente, comprobante,pageableRequest);
+							cfdiSize = cfdiPrincipalService.countSearchByClienteAndComprobanteWithFecha(fechaInicial,fechafinal,idCliente, comprobante);
+							searchTotal = (int) cfdi.getTotalElements();
+							
 						}else {
-							cfdi = cfdiPrincipalService.findCfdiByClienteAByComprobanteAndFecha(idCliente, comprobante, fechInicial, fechFinal);
-							searchTotal = cfdi.size();
+							//busqueda cfdi with input
+							cfdi = cfdiPrincipalService.findCfdiByClienteAByComprobanteAndFecha(idCliente, comprobante, fechaInicial, fechafinal,pageableRequest);
+							cfdiSize = (int) cfdi.getTotalElements();
 						}
 					} else {
 						// busqueda de cfdi sin input
 						if(input.getSearch().getValue()!=null && input.getSearch().getValue()!="") {
-							cfdi = cfdiPrincipalService.findCfdiBySearchByClienteAndComprobante(input.getSearch().getValue(), idCliente, comprobante);
-							searchTotal = cfdiPrincipalService.countSearchByClienteAndComprobante(idCliente, comprobante);
+							cfdi = cfdiPrincipalService.findCfdiBySearchByClienteAndComprobante(input.getSearch().getValue(), idCliente, comprobante,pageableRequest);
+							searchTotal = (int) cfdi.getTotalElements();
+							cfdiSize = cfdiPrincipalService.countCfdiByClienteAndComprobante(idCliente, comprobante);
 						}else {
-							cfdi = cfdiPrincipalService.findCfdiByClienteAndComprobante(idCliente, comprobante);
-							searchTotal = cfdi.size();
+							
+							cfdi =cfdiPrincipalService.findCfdiByClienteAndComprobanteWithCount(idCliente, comprobante,pageableRequest);
+							cfdiSize = (int) cfdi.getTotalElements();
 						}
 					}
-
 				
 
-				if (cfdi != null && cfdi.size() > 0) {
-					listDto = cfdi.stream().map(this::convertToDto).collect(Collectors.toList());
-
-					int startCfdi = input.getStart();
-					totalCfdi = input.getLength() + input.getStart();
-					int validamostotalstart = totalCfdi;
-					if (validamostotalstart > listDto.size()) {
-						totalCfdi = listDto.size();
+				if (cfdi.getContent()!=null && cfdi.getContent().size() > 0) {
+					result.setData(cfdi.getContent().stream().map(this::convertToDto).collect(Collectors.toList()));
+			        result.setRecordsTotal(cfdiSize);
+			        if(searchTotal>0) {
+						result.setRecordsFiltered(searchTotal);
+					}else {
+						result.setRecordsFiltered(cfdiSize);
 					}
-
-					index += startCfdi;
-					for (int x = input.getStart(); x < totalCfdi; x++) {
-
-						data += "{" + "\"razonSocial\" :" + "\"" + listDto.get(x).getRazonSocial() + "\", "
-								+ "\"rfc\" :" + "\"" + listDto.get(x).getRfc() + "\", " + "\"uuid\" :" + "\""
-								+ listDto.get(x).getUuid() + "\", " + "\"folio\" :" + "\"" + listDto.get(x).getFolio()
-								+ "\", " + "\"serie\" :" + "\"" + listDto.get(x).getSerie() + "\", " + "\"fecha\" :"
-								+ "\"" + listDto.get(x).getFecha() + "\", " + "\"total\" : " + "\""
-								+ listDto.get(x).getTotal() + "\", " + "\"id\" :" + "\"" + listDto.get(x).getId() + "\""
-								+ "}";
-
-						if (index < totalCfdi) {
-							data += ",";
-						}
-
-						index++;
-					}
+			        
 				}
-				json = "{" + "\"recordsTotal\" : " + searchTotal + "," + "\"recordsFiltered\" : " + cfdi.size()
-				+ "," + "\"data\" : [" + data + "]" + "}";
+				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.info("Error al momento de la ejecucion: " + e);
 		}
-		response.setStatus(200);
-		response.setContentType("application/x-json;charset=UTF-8");
-		response.getWriter().write(json);
+		
+		return result;
+		
 
 	}
 

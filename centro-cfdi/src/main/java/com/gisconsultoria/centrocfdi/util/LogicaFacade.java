@@ -68,7 +68,7 @@ public class LogicaFacade implements ILogicaFacade{
 		if (cfdiDoc != null) {
 			for (CfdiPrincipal cfdi : cfdiDoc) {
 				if (cfdi != null) {
-					LOG.error("El folio ".concat(cfdi.getTfdUuid().concat(" ya se encuentra registrado en la BD")));
+					LOG.error("El uuid ".concat(cfdi.getTfdUuid().concat(" ya se encuentra registrado en la BD")));
 					
 					  if (archivoXml.delete() && archivoPdf.delete()) {
 					  LOG.info("Archivo repetido "+xml+" y "+pdf+", se eliminó correctamente");
@@ -113,11 +113,15 @@ public class LogicaFacade implements ILogicaFacade{
     	SimpleDateFormat parseHora = new SimpleDateFormat("HH:mm:ss");
         String fechaDoc = parseFecha.format(comprobante.getFecha());
         String horaDoc = parseHora.format(comprobante.getFecha());
+        String comprobanteCfdi=null;
+        if(comprobante.getMetodoPago()!=null) {
+        	comprobanteCfdi=comprobante.getMetodoPago().toString();
+        }
         
     	cfdi = new CfdiPrincipal(sucursal,comprobante.getVersion().toString(),comprobante.getSerie(),comprobante.getFolio(),comprobante.getFecha()
     			,horaDoc,comprobante.getSello(),comprobante.getFormaPago(),comprobante.getNoCertificado(),comprobante.getCertificado(),comprobante.getCondicionesPago()
     			,comprobante.getSubTotal(),comprobante .getDescuento(),comprobante.getMoneda().toString(),comprobante.getTipoCambio(),comprobante.getTotal()
-    			,comprobante.getTipoComprobante().toString(),comprobante.getMetodoPago().toString(),comprobante.getLugarExpedicion(),comprobante.getConfirmacion()
+    			,comprobante.getTipoComprobante().toString(),comprobanteCfdi,comprobante.getLugarExpedicion(),comprobante.getConfirmacion()
     			,true,timbrefiscal.getVersion(),timbrefiscal.getUuid(),timbrefiscal.getFechaTimbrado(),timbrefiscal.getTimeTimbre(),timbrefiscal.getSelloCfd(),timbrefiscal.getCertificadoSat(),timbrefiscal.getSelloSat());
     	
     	cfdiPrincipalService.save(cfdi);
@@ -202,7 +206,7 @@ public class LogicaFacade implements ILogicaFacade{
 			LOG.error("Error al momento de parsear el archivo:" + pdf);
 		}
 		}else {
-			LOG.error("El archivo "+pdf+" no se encuentra ");
+			LOG.error("El archivo "+pdf+" no existe ");
 			throw new Exception("El archivo "+pdf+" no existe");
 		}
 		return fileContentPdf;
