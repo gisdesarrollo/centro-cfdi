@@ -85,7 +85,7 @@ public class LogicaFacade implements ILogicaFacade{
 	@Override
 	public boolean checarRfcReceptor(ComprobanteXmlDto comprobante) throws Exception {
 
-		Clientes empresa = sucursalService.getSucursalByRfc(comprobante.getEmisor().getRfc());
+		Clientes empresa = sucursalService.getClienteByRfc(comprobante.getEmisor().getRfc());
 
 		if (empresa == null) {
 			throw new Exception("El RFC del emisor: ".concat(comprobante.getEmisor().getRfc())
@@ -102,7 +102,7 @@ public class LogicaFacade implements ILogicaFacade{
     	FileInputStream input = null;
     	try {
     	//obtener la sucursal 
-    	Clientes sucursal = sucursalService.getSucursalByRfc(comprobante.getEmisor().getRfc());
+    	Clientes sucursal = sucursalService.getClienteByRfc(comprobante.getEmisor().getRfc());
          if (sucursal == null) {
              throw new Exception("No se encontró el RFC del emisor: "
                      .concat(comprobante.getEmisor().getRfc()));

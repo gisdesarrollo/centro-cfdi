@@ -63,7 +63,7 @@ public class GisconsultoriaXsaService {
         unpackArchive(zip, path,sucursal.getNombre());
 
         sucursal.setFechaInicial(calendar.getTime());
-        empresaService.updateFechaInicialEmpresaById(calendar.getTime(),sucursal.getId() );
+        empresaService.updateFechaInicialClienteById(calendar.getTime(),sucursal.getId() );
         
         }catch (IOException e) {
 			e.printStackTrace();
@@ -74,18 +74,13 @@ public class GisconsultoriaXsaService {
         }
     }
 
-    private void unpackArchive(File zip, File path, String nombreSucursal) throws IOException{
+    public void unpackArchive(File zip, File path, String nombreSucursal) throws IOException{
     	File pathCliente = new  File(path.toString().concat("\\").concat(nombreSucursal));
     	System.out.println(zip);
         if(!zip.exists()){
             throw new IOException(zip.getAbsolutePath() + " no existe el archivo");
         }
-        if(!pathCliente.exists()){
-            throw new IOException("No se puede encontrar el directorio: " + path);
-        }else {
-        	buildDirectory(pathCliente);
-        }
-
+       
         ZipFile zipFile = new ZipFile(zip);
         for(Enumeration entries = zipFile.entries(); entries.hasMoreElements();){
             ZipEntry entry = (ZipEntry)entries.nextElement();
@@ -111,7 +106,7 @@ public class GisconsultoriaXsaService {
 
     }
 
-    private void copyInputStream(InputStream in, OutputStream out) throws IOException{
+    public void copyInputStream(InputStream in, OutputStream out) throws IOException{
         byte[] buffer = new byte[2048];
 
         int len = in.read(buffer);

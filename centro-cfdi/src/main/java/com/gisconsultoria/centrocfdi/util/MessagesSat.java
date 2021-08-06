@@ -169,7 +169,7 @@ public class MessagesSat implements IMessagesSat {
 		String messageDescarga = "<s:Envelope xmlns:des=\"http://DescargaMasivaTerceros.sat.gob.mx\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xd=\"http://www.w3.org/2000/09/xmldsig#\">" + 
 				"<s:Header/>" + 
 				"<s:Body>" + 
-				"<des:PeticionDecargaMasivaTercerosEntrada>" + 
+				"<des:PeticionDescargaMasivaTercerosEntrada>" + 
 				"<des:peticionDescarga IdPaquete=\""+idPaquete+"\" RfcSolicitante=\""+rfcEmisor+"\">" + 
 				"<Signature xmlns=\"http://www.w3.org/2000/09/xmldsig#\">" + 
 				"<SignedInfo>" + 

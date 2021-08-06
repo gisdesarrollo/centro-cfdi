@@ -18,14 +18,14 @@ public class ClientesServiceImpl implements IClientesService{
 	private IClientesDao clienteDao;
 	
 	@Override
-	public List<Clientes> getActiveEmpresas() {
-		return clienteDao.getActiveEmpresas();
+	public List<Clientes> getActiveClientes() {
+		return clienteDao.getActiveClientes();
 	}
 
 	@Override
 	@Transactional
-	public void updateFechaInicialEmpresaById(Date fecha, Long id) {
-		clienteDao.updateFechaInicialEmpresaById(fecha, id);
+	public void updateFechaInicialClienteById(Date fecha, Long id) {
+		clienteDao.updateFechaInicialClienteById(fecha, id);
 		
 	}
 
@@ -35,8 +35,8 @@ public class ClientesServiceImpl implements IClientesService{
 	}
 
 	@Override
-	public Clientes getSucursalByRfc(String rfc) {
-		return clienteDao.getSucursalByRfc(rfc);
+	public Clientes getClienteByRfc(String rfc) {
+		return clienteDao.getClienteByRfc(rfc);
 	}
 
 	@Override

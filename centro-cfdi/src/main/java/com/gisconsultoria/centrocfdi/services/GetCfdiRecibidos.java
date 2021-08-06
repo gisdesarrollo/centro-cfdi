@@ -47,7 +47,7 @@ public class GetCfdiRecibidos {
 			List<Parametros> parametros = new ArrayList<Parametros>();
 			String urlParams=null;
 			String tokenParams=null;
-			List<Clientes> clientes = clientesService.getActiveEmpresas();
+			List<Clientes> clientes = clientesService.getActiveClientes();
 			for(Clientes cliente : clientes) {
 				parametros = parametroService.getParametrosByIdCliente(cliente.getId());
 				if(parametros.size()>0) {

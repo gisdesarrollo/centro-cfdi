@@ -31,7 +31,7 @@ public class XsaConnector {
 	private static final Logger LOG = LoggerFactory.getLogger(XsaConnector.class);
 	
 	@Autowired
-	private IClientesService empresasService;
+	private IClientesService clienteService;
 	
 	@Autowired
 	private GisconsultoriaXsaService xsaService;
@@ -49,15 +49,15 @@ public class XsaConnector {
 	 public void ProcesandoFoliofiscal() {
 		 
 		// cfdiRecibidos.getcfdiRecibidos();
-		 List<Clientes> empresas = empresasService.getActiveEmpresas();
+		 List<Clientes> clientes = clienteService.getActiveClientes();
 	        ZoneId zoneId = ZoneId.of("America/Mexico_City");
 	        Date fechaActual = Date.from(ZonedDateTime.now(zoneId).toInstant());
 	        Calendar calendar = Calendar.getInstance();
 	        
-	        if(empresas != null){
+	        if(clientes != null){
 	            try{
 	                LOG.info("DESCARGANDO ARCHIVOS DEL SERVLET");
-	             /* for(Clientes sucursal : empresas){
+	              for(Clientes sucursal : clientes){
 	                        if(fechaActual.after(sucursal.getFechaInicial())){
 	                            LocalDate fechaInicial = sucursal.getFechaInicial().toInstant()
 	                                                             .atZone(zoneId)
@@ -70,7 +70,7 @@ public class XsaConnector {
 	                            calendar.setTime(sucursal.getFechaInicial());
 	                            for(long dias = 0; totalDias < dias; totalDias++){
 	                                calendar.add(Calendar.DAY_OF_MONTH, (int)dias);
-	                                Clientes readSucursal = empresasService.findById(sucursal.getId());
+	                                Clientes readSucursal = clienteService.findById(sucursal.getId());
 	                                LocalDate fechaInicial2 = readSucursal.getFechaInicial()
 	                                                           .toInstant()
 	                                                           .atZone(zoneId)
@@ -85,11 +85,11 @@ public class XsaConnector {
 	                                }
 	                            }
 	                        }
-	                	}*/
-	             for(Clientes sucursal : empresas) {
+	                	}
+	             for(Clientes cliente : clientes) {
 	            	
-	            	 LOG.info("OBTENIENDO ARCHIVOS EXTRAIDOS EN LA CARPETA " +sucursal.getNombre());
-	            	 File pathCliente = new  File(path.toString().concat("\\").concat(sucursal.getNombre())); 
+	            	 LOG.info("OBTENIENDO ARCHIVOS EXTRAIDOS EN LA CARPETA " +cliente.getNombre());
+	            	 File pathCliente = new  File(path.toString().concat("\\").concat(cliente.getNombre())); 
 	            	 gisConsultoriaReadXmlFile.readXmlFile(pathCliente);
 	            	 
 	             }

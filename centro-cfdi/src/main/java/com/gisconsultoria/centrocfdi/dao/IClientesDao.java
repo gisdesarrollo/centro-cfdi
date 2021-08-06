@@ -15,14 +15,14 @@ import com.gisconsultoria.centrocfdi.model.dto.ClientesDto;
 public interface IClientesDao extends CrudRepository<Clientes, Long> {
 
 	 @Query("select s from Clientes s where s.status = 1")
-	    public List<Clientes> getActiveEmpresas();
+	    public List<Clientes> getActiveClientes();
 	 
 	 @Modifying
 		@Query("update Clientes e set e.fechaInicial = :fecha where e.id = :id")
-		public void updateFechaInicialEmpresaById(@Param ("fecha") Date fecha, @Param("id") Long id);
+		public void updateFechaInicialClienteById(@Param ("fecha") Date fecha, @Param("id") Long id);
 	 
 	 @Query("select s from Clientes s where s.rfc = :rfc ")
-	    public Clientes getSucursalByRfc(@Param("rfc")String rfc);
+	    public Clientes getClienteByRfc(@Param("rfc")String rfc);
 	 
 	 @Query(value = "select c.Id  from cat_usuarios u "
 	 		+ "join rel_usuarios_clientes relUC on (u.id_usuario=relUC.id_usuario) "

@@ -17,4 +17,7 @@ public interface IDescargaMasivaSat {
 
 	public String getDescarga(String rfcEmisor, String idPaquete, byte[] cerByte, byte[] keyByte, String password);
 
+
+	public void decodeZip(String zipData, String rfc);
+
 }

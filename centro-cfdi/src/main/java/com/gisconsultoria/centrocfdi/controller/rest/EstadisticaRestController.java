@@ -58,7 +58,7 @@ public class EstadisticaRestController {
 			}
 			if (rolUsername != null && rolUsername.equals("ROLE_ADMIN")) {
 				// ROL_ADMIN
-				clientes = clienteService.getActiveEmpresas();
+				clientes = clienteService.getActiveClientes();
 				for (Clientes lista : clientes) {
 					lista.setCer(null);
 					lista.setKey(null);

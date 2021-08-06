@@ -90,13 +90,11 @@ public class Clientes implements Serializable {
     @Column(name = "FechaInicial")
     private Date fechaInicial; 
     
-  
-  /*  @OneToMany(mappedBy = "empresaId")
-    private Set<CfdiPrincipal> cfdiPrincipal;
-    */
+    @Column(name = "FechaInicialSat")
+    private Date fechaInicialSat;
     
     public Clientes() {
-    	//this.cfdiPrincipal = new HashSet<>();
+    	
 	}
 
 	public Long getId() {
@@ -243,15 +241,12 @@ public class Clientes implements Serializable {
 		this.fechaInicial = fechaInicial;
 	}
 
-	
-	
-	
-	/*public Set<CfdiPrincipal> getCfdiPrincipal() {
-		return cfdiPrincipal;
+	public Date getFechaInicialSat() {
+		return fechaInicialSat;
 	}
 
-	public void setCfdiPrincipal(Set<CfdiPrincipal> cfdiPrincipal) {
-		this.cfdiPrincipal = cfdiPrincipal;
-	}*/
+	public void setFechaInicialSat(Date fechaInicialSat) {
+		this.fechaInicialSat = fechaInicialSat;
+	}
     
 	}

@@ -76,7 +76,7 @@ public class ClientesRestController {
 		}
 		if(rolUsername!=null && rolUsername.equals("ROLE_ADMIN")) {
 		//ROL_ADMIN
-		clientes = clienteService.getActiveEmpresas();
+		clientes = clienteService.getActiveClientes();
 		for (Clientes lista : clientes) {
 			lista.setCer(null);
 			lista.setKey(null);
@@ -97,7 +97,7 @@ public class ClientesRestController {
 	public List<Clientes> getAllClientes() {
 		 
 		List<Clientes> clientes=null;
-		clientes = clienteService.getActiveEmpresas();
+		clientes = clienteService.getActiveClientes();
 		for (Clientes lista : clientes) {
 			lista.setCer(null);
 			lista.setKey(null);

@@ -10,13 +10,13 @@ import com.gisconsultoria.centrocfdi.model.dto.ClientesDto;
 
 public interface IClientesService {
 
-	public List<Clientes> getActiveEmpresas();
+	public List<Clientes> getActiveClientes();
 	
-	public void updateFechaInicialEmpresaById(Date fecha, Long id);
+	public void updateFechaInicialClienteById(Date fecha, Long id);
 	
 	public Clientes findById(Long id);
 
-	public Clientes getSucursalByRfc(String rfc);
+	public Clientes getClienteByRfc(String rfc);
 	
 	public void save(Clientes cliente);
 	

@@ -1,5 +1,12 @@
 package com.gisconsultoria.centrocfdi.util;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -7,8 +14,10 @@ import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.SignatureException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,21 +26,29 @@ import javax.security.auth.x500.X500Principal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.gisconsultoria.centrocfdi.services.GetCfdiSatService;
+import com.gisconsultoria.centrocfdi.services.GisconsultoriaXsaService;
 
 @Service
 public class DescargaMasivaSat implements IDescargaMasivaSat {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DescargaMasivaSat.class);
-
+	
+	@Value("${path.archivo.archivosXml}")
+	private String pathArchivos;
+	 
 	@Autowired
 	private GetCfdiSatService cfdiSatService;
 
 	@Autowired
 	private IMessagesSat messagesSat;
-
+	
+	@Autowired
+	private GisconsultoriaXsaService xsaService;
+	
 	@Override
 	public String getAuthenticacion(UUID uuid, String fechaInicial, String fechaFinal, byte[] cerByte, byte[] keyByte,
 			String password) {
@@ -49,7 +66,6 @@ public class DescargaMasivaSat implements IDescargaMasivaSat {
 			PrivateKey privateKey = cfdiSatService.getPrivateKey(keyByte, password);
 			// encode cer
 			encodeCer = Base64.getEncoder().encodeToString(cerByte);
-			System.out.println("authenticacion CER: " + encodeCer);
 			// get certficado
 			X509Certificate cer = cfdiSatService.getCertificate(cerByte);
 
@@ -227,6 +243,34 @@ public class DescargaMasivaSat implements IDescargaMasivaSat {
 		}
 
 		return messageXml;
+	}
+	
+	@Override
+	public void decodeZip(String zipData,String rfc) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String dateString = dateFormat.format(new Date());
+		byte[] compresed = Base64.getDecoder().decode(zipData);
+		if(compresed == null || compresed.length == 0 ) {
+			throw new IllegalArgumentException("No se pueden descomprimir bytes nulos o vacíos");
+		}
+		InputStream in = new ByteArrayInputStream(compresed);
+		//guarda zip en temp files
+		 File zip;
+		try {
+			LOG.info("COPIANDO ZIP SAT A ARCHIVOS TEMPORALES..");
+			zip = File.createTempFile(rfc, dateString.concat(".zip"));
+			OutputStream out = new BufferedOutputStream(new FileOutputStream(zip));
+	        xsaService.copyInputStream(in, out);
+	        out.close();
+	        File path = new File(pathArchivos);
+	        LOG.info("DESCOMPRIMIENDO ZIP SAT..");
+	        xsaService.unpackArchive(zip,path, rfc);
+		} catch (IOException e) {
+			e.printStackTrace();
+			LOG.error("Error al momento de decodificar Zip del SAT");
+			
+		}
+	        
 	}
 
 }
