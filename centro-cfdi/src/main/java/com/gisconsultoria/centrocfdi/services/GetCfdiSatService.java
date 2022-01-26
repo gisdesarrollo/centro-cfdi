@@ -35,8 +35,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.ssl.PKCS8Key;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -48,10 +47,11 @@ import org.xml.sax.SAXException;
 
 import com.gisconsultoria.centrocfdi.model.Solicitudes;
 import com.gisconsultoria.centrocfdi.service.ISolicitudService;
+import com.gisconsultoria.centrocfdi.sheduled.XsaConnector;
 
 @Service
 public class GetCfdiSatService {
-	private static final Logger LOG = LoggerFactory.getLogger(GetCfdiSatService.class);
+	protected final Logger LOG = Logger.getLogger(GetCfdiSatService.class);
 
 	@Autowired
 	private ISolicitudService solicitudService;

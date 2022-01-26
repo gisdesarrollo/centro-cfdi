@@ -23,8 +23,7 @@ import java.util.UUID;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,7 @@ import com.gisconsultoria.centrocfdi.services.GisconsultoriaXsaService;
 @Service
 public class DescargaMasivaSat implements IDescargaMasivaSat {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DescargaMasivaSat.class);
+	protected final Logger LOG = Logger.getLogger(DescargaMasivaSat.class);
 	
 	@Value("${path.archivo.archivosXml}")
 	private String pathArchivos;

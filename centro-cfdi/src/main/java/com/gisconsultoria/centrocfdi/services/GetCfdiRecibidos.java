@@ -12,8 +12,7 @@ import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.logging.Log;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,12 +23,12 @@ import com.gisconsultoria.centrocfdi.model.Parametros;
 import com.gisconsultoria.centrocfdi.service.ICfdiRecibidosService;
 import com.gisconsultoria.centrocfdi.service.IClientesService;
 import com.gisconsultoria.centrocfdi.service.IParametrosService;
+import com.gisconsultoria.centrocfdi.sheduled.XsaConnector;
 
 @Service
 public class GetCfdiRecibidos {
 
-	private static final Logger LOG = LoggerFactory.getLogger(GetCfdiRecibidos.class);
-
+	protected final Logger LOG = Logger.getLogger(GetCfdiRecibidos.class);
 
 	@Autowired
 	private ICfdiRecibidosService cfdiRecibidosService;

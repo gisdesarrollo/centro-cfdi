@@ -78,7 +78,6 @@ public class CfdiPrincipal implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cliente"/*,nullable = false*/)
 	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-	//@Column(name = "id_cliente")
 	private Clientes empresaId;
 	
 	public CfdiPrincipal() {}

@@ -66,4 +66,10 @@ public interface ICfdiPrincipalService {
 	public int countSearchByClienteAndComprobanteWithFecha(String fechaInicial,String fechaFinal,List<Long> cliente,List<String> comprobante);
 	
 	public Long getEstadisticaByIdcliente(Long idCliente, String tipoComp);
+	
+	public List<CfdiPrincipal> findCfdiByCliente(Long idCliente );
+	
+	public List<CfdiPrincipal> findAllCfdiNoStatusByCliente(Long idCliente);
+	
+	public CfdiPrincipal findById(Long id);
 }

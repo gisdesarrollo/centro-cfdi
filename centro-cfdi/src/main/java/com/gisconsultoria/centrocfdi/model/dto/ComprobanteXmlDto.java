@@ -3,6 +3,7 @@ package com.gisconsultoria.centrocfdi.model.dto;
 import javax.xml.bind.Element;
 import javax.xml.bind.annotation.*;
 
+import com.gisconsultoria.centrocfdi.model.dao.AddendaDao;
 import com.gisconsultoria.centrocfdi.model.dao.ComprobanteCfdiRelacionado;
 import com.gisconsultoria.centrocfdi.model.dao.ConceptoDao;
 import com.gisconsultoria.centrocfdi.model.dao.EmisorDao;
@@ -104,7 +105,10 @@ public class ComprobanteXmlDto {
 
     @XmlElement(name = "CfdiRelacionados", namespace = "http://www.sat.gob.mx/cfd/3")
     private List<ComprobanteCfdiRelacionado> cfdiRelacionados;
-
+    
+    @XmlElement(name = "Addenda", namespace = "http://www.sat.gob.mx/cfd/3")
+    private AddendaDao addenda;
+    
     @XmlAttribute(name = "LugarExpedicion")
     private String lugarExpedicion;
 
@@ -333,8 +337,16 @@ public class ComprobanteXmlDto {
     public void setCfdiRelacionados(List<ComprobanteCfdiRelacionado> cfdiRelacionados) {
         this.cfdiRelacionados = cfdiRelacionados;
     }
+    
+	public AddendaDao getAddenda() {
+		return addenda;
+	}
 
-    public String getLugarExpedicion() {
+	public void setAddenda(AddendaDao addenda) {
+		this.addenda = addenda;
+	}
+
+	public String getLugarExpedicion() {
         return lugarExpedicion;
     }
 

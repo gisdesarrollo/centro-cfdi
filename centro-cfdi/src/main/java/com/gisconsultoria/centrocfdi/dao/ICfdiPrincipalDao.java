@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.gisconsultoria.centrocfdi.model.CfdiPrincipal;
+import com.gisconsultoria.centrocfdi.service.CfdiPrincipalServiceImpl;
 
 public interface ICfdiPrincipalDao extends DataTablesRepository<CfdiPrincipal, Long> {
 
@@ -132,6 +133,15 @@ public interface ICfdiPrincipalDao extends DataTablesRepository<CfdiPrincipal, L
 (select  count(*) from centrocfdi.m_cfdi_33 where id_cliente=23 and  tipodecomprobante in('T'))as Traslado    
 from centrocfdi.m_cfdi_33 c where c.id_cliente=23 
 group by c.id_cliente ;*/
+	
+	/*esta query la utilizo para obtener facturas de DAL para envio de datos soap chilenos*/
+	@Query(value="select c.* from m_cfdi_33 c where c.id_cliente=?1 ", nativeQuery = true)
+	public List<CfdiPrincipal> findCfdiByCliente(Long idCliente );
+	
+	@Query(value ="select mc.* from  m_cfdi_33 mc left join status_ws st"
+			+ " on st.id_cfdi = mc.id_cfdi where st.status='ENPROCESO' and mc.id_cliente=?1",nativeQuery = true)
+	public List<CfdiPrincipal> findAllCfdiNoStatusByCliente(Long idCliente); 
+	
 	
 }
 	

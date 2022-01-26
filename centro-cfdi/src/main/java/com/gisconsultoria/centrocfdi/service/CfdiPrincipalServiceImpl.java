@@ -130,6 +130,21 @@ public class CfdiPrincipalServiceImpl implements ICfdiPrincipalService {
 		return cfdiPrincipalDao.getEstadisticaByIdcliente(idCliente,tipoComp);
 	}
 
+	@Override
+	public List<CfdiPrincipal> findCfdiByCliente(Long idCliente) {
+		return cfdiPrincipalDao.findCfdiByCliente(idCliente);
+	}
+
+	@Override
+	public List<CfdiPrincipal> findAllCfdiNoStatusByCliente(Long idCliente) {
+		return cfdiPrincipalDao.findAllCfdiNoStatusByCliente(idCliente);
+	}
+
+	@Override
+	public CfdiPrincipal findById(Long id) {
+		return cfdiPrincipalDao.findById(id).orElse(null);
+	}
+
 
 	
 

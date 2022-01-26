@@ -1,8 +1,7 @@
 package com.gisconsultoria.centrocfdi.util;
 
 import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -15,6 +14,7 @@ import com.gisconsultoria.centrocfdi.model.dao.ComplementoDao;
 import com.gisconsultoria.centrocfdi.model.dao.ImpuestoDao;
 import com.gisconsultoria.centrocfdi.model.dto.ComprobanteXmlDto;
 import com.gisconsultoria.centrocfdi.model.dto.TimbreFiscalDto;
+import com.gisconsultoria.centrocfdi.sheduled.XsaConnector;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -41,8 +41,7 @@ import java.util.stream.Stream;
 @Service
 public class GisConsultoriaReadXmlFile implements IReadXmlFile{
 
-	 private static final Logger LOG = 
-		      LoggerFactory.getLogger(GisConsultoriaReadXmlFile.class.getName());
+	protected final Logger LOG = Logger.getLogger(GisConsultoriaReadXmlFile.class);
 
     @Autowired
     private ILogicaFacade logicaFacade;
@@ -130,7 +129,7 @@ public class GisConsultoriaReadXmlFile implements IReadXmlFile{
         ComprobanteXmlDto comprobante = (ComprobanteXmlDto)unmarshaller.unmarshal(
                 new File(file.getAbsolutePath() + "/" + xml));
 
-        LOG.info("XML DESERELIAZIDO");
+        LOG.info("XML DESEREALIZADO");
         ZoneId zoneId = ZoneId.of("America/Mexico_City");
         Date fechaActual = Date.from(ZonedDateTime.now(zoneId).toInstant());
  

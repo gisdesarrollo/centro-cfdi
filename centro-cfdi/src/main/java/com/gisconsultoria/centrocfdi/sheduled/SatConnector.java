@@ -40,8 +40,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.ssl.PKCS8Key;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -61,8 +60,8 @@ import com.gisconsultoria.centrocfdi.util.IDescargaMasivaSat;
 @EnableScheduling
 public class SatConnector {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SatConnector.class);
-
+	protected final Logger LOG = Logger.getLogger(SatConnector.class);
+	
 	@Value("${url.ws.sat.autenticacion}")
 	private String urlWsAutenticacion;
 
@@ -99,7 +98,7 @@ public class SatConnector {
 	@Autowired
 	private ISolicitudService solicitudService;
 
-	@Scheduled(cron = "05 43 15 * * *", zone = "America/Mexico_City")
+	//@Scheduled(cron = "05 43 15 * * *", zone = "America/Mexico_City")
 	public void dowloadCfdiSat() throws CertificateEncodingException, IOException {
 
 		byte[] cerByte = null;
@@ -181,11 +180,7 @@ public class SatConnector {
 					}
 				}
 			}
-			LOG.info("BUSCANDO SOLICITUDES PENDIENTES PARA DESCARGA");
-			List<Solicitudes> solicitudes = solicitudService.getSolicitudesWithEstatusEnProceso();
-			for (Solicitudes solicitud : solicitudes) {
-				dowloadCfdiByIdSolicitud(solicitud);
-			}
+			
 			LOG.info("DESCARGAS CFDIs SAT FINALIZADO CORRECTAMENTE...");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -222,65 +217,4 @@ public class SatConnector {
 		return sdf.format(fecha);
 	}
 
-	public void dowloadCfdiByIdSolicitud(Solicitudes solicitud) {
-		byte[] cerByte = null;
-		byte[] keyByte = null;
-		String password = null;
-		String rfcEmisor = null;
-		int maxMinutos = 5;
-		String token = null;
-		String zipString = null;
-		List<String> idPaquete = new ArrayList<String>();
-		try {
-		if (solicitud.getIdSolicitud() != null) {
-			String fechaInicialA = getFechaAuthenticacion(0);
-			String fechaFinalA = getFechaAuthenticacion(maxMinutos);
-			// randomUUID
-			UUID uuid = UUID.randomUUID();
-			Clientes cliente = clienteService.getClienteByRfc(solicitud.getRfcCliente());
-				cerByte = cliente.getCer();
-				keyByte = cliente.getKey();
-				password = cliente.getPasswordKey();
-				rfcEmisor = cliente.getRfc();
-
-					// Authenticacion
-					String messageAuthenticacion = descargaMasivaSat.getAuthenticacion(uuid, fechaInicialA, fechaFinalA,
-							cerByte, keyByte, password);
-					token = cfdiSatService.connectionSat(urlWsAutenticacion, soapActionAutenticacion,
-							messageAuthenticacion, null, "authenticacion");
-					if (token != null) {
-						// Verifcación
-						String messageVerificacion = descargaMasivaSat.getverificacion(rfcEmisor, solicitud.getIdSolicitud(), cerByte,
-								keyByte, password);
-						idPaquete = cfdiSatService.connectSatWSVerificacion(urlWsVerificacion, soapActionVerificacion,
-								messageVerificacion, token, "verificacion", solicitud.getIdSolicitud(), rfcEmisor);
-						if (!idPaquete.isEmpty()) {
-							// Descarga
-							if (idPaquete.size() > 0) {
-								for (String paquete : idPaquete) {
-									String messageDescarga = descargaMasivaSat.getDescarga(rfcEmisor, paquete,
-											cerByte, keyByte, password);
-									zipString = cfdiSatService.connectionSat(urlWsDescarga, soapActionDescarga,
-											messageDescarga, token, "descarga");
-									if (zipString != null) {
-										descargaMasivaSat.decodeZip(zipString, rfcEmisor);
-									} else {
-										LOG.error("No se encontraron CFDIs para descargar");
-									}
-								}
-								solicitudService.deleteById(solicitud.getId());
-							}
-						} else {
-							LOG.error("Error idPaquete null");
-						}
-					}else {
-						LOG.error("No se pudo obtener un token, token null");
-					}
-				}
-			}catch (Exception e) {
-				e.printStackTrace();
-				LOG.error("Error en tiempo de solicitudes pendientes de descarga..");
-			}
-		
-	}
 }

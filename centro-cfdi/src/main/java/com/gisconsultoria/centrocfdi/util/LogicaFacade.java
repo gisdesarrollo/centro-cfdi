@@ -2,8 +2,7 @@ package com.gisconsultoria.centrocfdi.util;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tomcat.util.http.fileupload.UploadContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,12 +13,16 @@ import org.springframework.web.multipart.MultipartFile;
 import com.gisconsultoria.centrocfdi.model.CfdiPrincipal;
 import com.gisconsultoria.centrocfdi.model.Clientes;
 import com.gisconsultoria.centrocfdi.model.Pdf;
+import com.gisconsultoria.centrocfdi.model.Receptor;
+import com.gisconsultoria.centrocfdi.model.StatusWs;
 import com.gisconsultoria.centrocfdi.model.Xml;
 import com.gisconsultoria.centrocfdi.model.dto.ComprobanteXmlDto;
 import com.gisconsultoria.centrocfdi.model.dto.TimbreFiscalDto;
 import com.gisconsultoria.centrocfdi.service.ICfdiPrincipalService;
 import com.gisconsultoria.centrocfdi.service.IClientesService;
 import com.gisconsultoria.centrocfdi.service.IPdfService;
+import com.gisconsultoria.centrocfdi.service.IReceptorService;
+import com.gisconsultoria.centrocfdi.service.IStatusWsService;
 import com.gisconsultoria.centrocfdi.service.IXmlService;
 
 import java.io.File;
@@ -35,9 +38,8 @@ import java.util.Locale;
 
 @Service
 public class LogicaFacade implements ILogicaFacade{
-
-	private static final Logger LOG = LoggerFactory.getLogger(LogicaFacade.class.getName());
-
+	protected final Logger LOG = Logger.getLogger(LogicaFacade.class);
+	
 	@Autowired
 	private IClientesService sucursalService;
 
@@ -49,15 +51,21 @@ public class LogicaFacade implements ILogicaFacade{
 	
 	@Autowired
 	private IPdfService pdfService;
+	
+	@Autowired
+	private IReceptorService receptorService;
+	
+	@Autowired
+	private IStatusWsService statusWsService;
 
 	@Override
 	public boolean checarUuidRepetidoBD(TimbreFiscalDto timbreFiscal, File file, String xml) throws ParseException {
 
 		LOG.info("Verificando si existe el uuid: ".concat(timbreFiscal.getUuid()).concat(" en la base de datos"));
 
-		File archivoXml = new File(file.getAbsolutePath() + "/" + xml);
+		File archivoXml = new File(file.getAbsolutePath() + File.separator + xml);
 		String pdf = FilenameUtils.removeExtension(xml)+".pdf";
-		File archivoPdf = new  File(file.getAbsolutePath()+"/"+pdf); 
+		File archivoPdf = new  File(file.getAbsolutePath()+File.separator+pdf); 
 		Calendar calendar = Calendar.getInstance();
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-DD");
 		Date fechaTimbrado = format.parse(timbreFiscal.getFechaTimbrado());
@@ -100,6 +108,7 @@ public class LogicaFacade implements ILogicaFacade{
     	
     	CfdiPrincipal cfdi = null;
     	FileInputStream input = null;
+    	StatusWs statusWs = new StatusWs();
     	try {
     	//obtener la sucursal 
     	Clientes sucursal = sucursalService.getClienteByRfc(comprobante.getEmisor().getRfc());
@@ -107,6 +116,7 @@ public class LogicaFacade implements ILogicaFacade{
              throw new Exception("No se encontró el RFC del emisor: "
                      .concat(comprobante.getEmisor().getRfc()));
          }
+         
     	        
     	//formateo de fecha DOC
     	SimpleDateFormat parseFecha = new SimpleDateFormat("yyyy-MM-dd");
@@ -125,6 +135,27 @@ public class LogicaFacade implements ILogicaFacade{
     			,true,timbrefiscal.getVersion(),timbrefiscal.getUuid(),timbrefiscal.getFechaTimbrado(),timbrefiscal.getTimeTimbre(),timbrefiscal.getSelloCfd(),timbrefiscal.getCertificadoSat(),timbrefiscal.getSelloSat());
     	
     	cfdiPrincipalService.save(cfdi);
+    	//guardar Receptor
+        Receptor receptor = new Receptor();
+        	receptor.setIdCfdi(cfdi);
+        	receptor.setNombre(comprobante.getReceptor().getNombre());
+        	
+        	receptor.setNumRegiDTrib(comprobante.getReceptor().getNumRegIdTrib());
+        	if(comprobante.getReceptor().getResidenciaFiscal()!=null) {
+        		receptor.setResidenciaFiscal(comprobante.getReceptor().getResidenciaFiscal().toString());
+        	}
+        	receptor.setRfc(comprobante.getReceptor().getRfc());
+        	receptor.setUsoCfdi(comprobante.getReceptor().getUsoCfdi());
+        	receptorService.save(receptor);
+        if(!comprobante.getAddenda().getAvla().getReferencia().isEmpty()) {	
+        	LOG.info("GUARDANDO ESTATUS DE "+cfdi.getEmpresaId().getRfc() +" PARA ENVIO DE WEB SERVICE CHILENOS");
+			statusWs.setCfdi(cfdi);
+			statusWs.setFolio(cfdi.getFolio());
+			statusWs.setSerie(cfdi.getSerie());
+			statusWs.setReferencia(comprobante.getAddenda().getAvla().getReferencia());
+			statusWs.setStatus("ENPROCESO");
+			statusWsService.save(statusWs);
+        }
     	LOG.info("OBTENIENDO ARCHIVOS PARA GUARDAR");
     	uploadFilesBD(file, xml, cfdi);
     	
@@ -163,12 +194,18 @@ public class LogicaFacade implements ILogicaFacade{
 		
 		if(archivosXml.getId()!=null && archivosPdf.getId()!=null) {
 			LOG.info("ARCHIVOS "+ xml +" y "+ pdf +" GUARDADO CORRECTAMENTE ");
-			File pathXmlDelete = new  File(file.toString().concat("\\").concat(xml));
-			File pathPdfDelete = new  File(file.toString().concat("\\").concat(pdf)); 
-			if (pathXmlDelete.delete() && pathPdfDelete.delete()) {
-				  LOG.info("Eliminando archivos "+xml+" y "+pdf+", ya guardados en la BD");
+			File pathXmlDelete = new  File(file.toString()+File.separator+xml);
+			File pathPdfDelete = new  File(file.toString()+File.separator+pdf); 
+			if (pathXmlDelete.delete()) {
+				  LOG.info("Eliminando archivo "+pdf+ ", ya guardados en la BD");
+			}
+			else {
+				LOG.error("Error al eliminar el archivo XML");
+			}
+			if(pathPdfDelete.delete()) {
+				LOG.info("Eliminando archivo "+pdf+ ", ya guardados en la BD");
 			}else {
-				throw new IOException("Error al eliminar los archivos");
+				LOG.error("Error al eliminar el archivo PDF");
 			}
 		}
 		
@@ -178,7 +215,7 @@ public class LogicaFacade implements ILogicaFacade{
 	
 	private byte[] getByteXml(File file, String xml) throws Exception {
 		byte[] fileContentXml = null;
-		File pathCliente = new  File(file.toString().concat("\\").concat(xml));
+		File pathCliente = new  File(file.toString()+File.separator+xml);
 		if(pathCliente.exists() && !pathCliente.isDirectory()) {
 			try {
 				fileContentXml = Files.readAllBytes(pathCliente.toPath());
@@ -197,7 +234,7 @@ public class LogicaFacade implements ILogicaFacade{
 	
 	private byte[] getBytePdf(File file, String pdf) throws Exception {
 		byte[] fileContentPdf = null;
-		File pathCliente = new  File(file.toString().concat("\\").concat(pdf)); 
+		File pathCliente = new  File(file.toString()+File.separator+pdf); 
 		if(pathCliente.exists() && !pathCliente.isDirectory()) {
 		 try {
 			fileContentPdf = Files.readAllBytes(pathCliente.toPath());
@@ -207,7 +244,7 @@ public class LogicaFacade implements ILogicaFacade{
 		}
 		}else {
 			LOG.error("El archivo "+pdf+" no existe ");
-			throw new Exception("El archivo "+pdf+" no existe");
+			//throw new Exception("El archivo "+pdf+" no existe");
 		}
 		return fileContentPdf;
 	}
