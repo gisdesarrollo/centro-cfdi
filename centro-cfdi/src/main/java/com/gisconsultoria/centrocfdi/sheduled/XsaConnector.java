@@ -50,8 +50,9 @@ public class XsaConnector {
 
 	private String rfcClienteWs = "DAL050601L35";
 
-	 //@Scheduled(cron = "05 20 13 * * *", zone = "America/Mexico_City")
-	@Scheduled(fixedDelay = 600000) // se ejecuta cada 10 minutos
+	 //@Scheduled(cron = "05 11 09 * * *", zone = "America/Mexico_City")
+	//@Scheduled(fixedDelay = 600000) // se ejecuta cada 10 minutos
+	@Scheduled(fixedDelay = 21600000) // se ejecuta cada 6 horas
 	public void ProcesandoFoliofiscal() {
 
 		List<Clientes> clientes = clienteService.getActiveClientes();

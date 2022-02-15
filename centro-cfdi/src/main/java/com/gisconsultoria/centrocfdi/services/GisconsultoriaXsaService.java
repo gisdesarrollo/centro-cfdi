@@ -39,7 +39,10 @@ public class GisconsultoriaXsaService {
 
         Clientes sucursal = empresaService.findById(sucursalId);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String fechaInicial = dateFormat.format(fecha);
+        Calendar cFechaInicial = Calendar.getInstance();
+        cFechaInicial.setTime(fecha);
+        cFechaInicial.add(Calendar.DAY_OF_YEAR, -3);
+        String fechaInicial = dateFormat.format(cFechaInicial.getTime());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(fechaActual);
         String fechaFinal = dateFormat.format(calendar.getTime());
